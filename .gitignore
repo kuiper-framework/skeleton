@@ -1,0 +1,9 @@
+/env
+.env
+/runtime
+/vendor
+*.gz
+/config.conf
+/.php_cs.cache
+/.idea/
+/.tars-gen.cache

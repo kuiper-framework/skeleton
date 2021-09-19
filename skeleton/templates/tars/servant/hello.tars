@@ -1,0 +1,7 @@
+module {ServerName}
+{
+    interface Hello
+    {
+        string hello(string message);
+    };
+};

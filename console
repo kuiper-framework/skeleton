@@ -1,0 +1,20 @@
+#!/bin/bash
+
+dir=$(dirname $0)
+
+if [ $# -eq 0 ]; then
+    cmd=list
+else
+    cmd=$1
+    shift
+fi
+
+if [ -d $dir/../conf ] && [ -f $dir/../conf/*.conf ] ; then
+    config=$(find $dir/../conf -type f -name '*.conf' | head -1)
+elif [ -f $dir/config.conf ]; then
+    config=$dir/config.conf
+else
+    config=$dir/config.conf.example
+fi
+
+php $dir/src/index.php --config $config $cmd "$@"
