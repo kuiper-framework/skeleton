@@ -181,15 +181,14 @@ class Installer
         $installer = new self($event->getIO(), $event->getComposer());
 
         $installer->io->write('<info>Setting up optional packages</info>');
-        $installer->packageName = $installer->askPackageName();
         $installer->sererType = $installer->askServerType();
+        $installer->packageName = $installer->askPackageName();
         $installer->namespace = $installer->askNamespace();
         if ($installer->isTarsServer()) {
             $installer->appName = $installer->askAppName();
             $installer->serverName = $installer->askServerName();
-        } else {
-            $installer->port = $installer->askPort();
         }
+        $installer->port = $installer->askPort();
 
         $installer->setupServer();
         $installer->replacePlaceHolder();
@@ -270,7 +269,7 @@ class Installer
 
             $this->composerDefinition['require'][$packageName] = $packageVersion;
             $this->composerRequires[$packageName] = $link;
-            $this->setPackageStabilityFalg($packageName, $packageVersion);
+            $this->setPackageStabilityFlag($packageName, $packageVersion);
         }
         foreach (self::$REQUIRES_DEV[$this->sererType] ?? [] as $packageName => $packageVersion) {
             $this->io->write(sprintf(
@@ -293,7 +292,7 @@ class Installer
             $this->composerDevRequires[$packageName] = $link;
 
             // Set package stability if needed
-            $this->setPackageStabilityFalg($packageName, $packageVersion);
+            $this->setPackageStabilityFlag($packageName, $packageVersion);
         }
     }
 
@@ -307,10 +306,10 @@ class Installer
     private function askPackageName(): string
     {
         $defaultNs = get_current_user().'/'.basename(getcwd());
-        $query = ["<question>Package name (<vendor>/<name>)</question><comment>($defaultNs)</comment>: "];
+        $query = "<question>Which project package name to use (<vendor>/<name>)</question><comment>($defaultNs)</comment>: ";
 
         while (true) {
-            $answer = $this->io->ask(implode($query), $defaultNs);
+            $answer = $this->io->ask($query, $defaultNs);
             if ($this->isValidPackage($answer)) {
                 return $answer;
             }
@@ -343,11 +342,11 @@ class Installer
 
     private function askNamespace(): string
     {
-        $defaultNs = basename(getcwd());
-        $query = ["<question>PHP namespace</question><comment>($defaultNs)</comment>: "];
+        $defaultNs = $this->getDefaultNamespace();
+        $query = "<question>Which php namespace to use </question><comment>($defaultNs)</comment>: ";
 
         while (true) {
-            $answer = $this->io->ask(implode($query), $defaultNs);
+            $answer = trim($this->io->ask($query, $defaultNs));
             if ($this->isValidNamespace($answer)) {
                 return $answer;
             }
@@ -357,8 +356,10 @@ class Installer
 
     private function askAppName(): string
     {
+        $defaultApp = explode('\\', $this->getDefaultNamespace())[0];
+        $query = "<question>Which Tars application name to use <comment>($defaultApp)</comment></question>: ";
         while (true) {
-            $answer = $this->io->ask('<question>Tars application name</question>: ');
+            $answer = trim($this->io->ask($query, $defaultApp));
             if ($this->isValidName($answer)) {
                 return $answer;
             }
@@ -368,8 +369,10 @@ class Installer
 
     private function askServerName(): string
     {
+        $defaultServer = explode('\\', $this->getDefaultNamespace())[1];
+        $query = "<question>Which Tars server name to use <comment>($defaultServer)</comment></question>: ";
         while (true) {
-            $answer = $this->io->ask('<question>Tars server name</question>: ');
+            $answer = trim($this->io->ask($query, $defaultServer));
             if ($this->isValidName($answer)) {
                 return $answer;
             }
@@ -379,10 +382,12 @@ class Installer
 
     private function askPort(): int
     {
+        $defaultPort = '8000';
+        $query = "<question>Which port to listen <comment>($defaultPort)</comment></question>: ";
         while (true) {
-            $answer = trim($this->io->ask('<question>Which port to listen</question>: '));
-            if (preg_match('/^\d+$/', $answer)) {
-                return (int) $answer;
+            $answer = (int) trim($this->io->ask($query, $defaultPort));
+            if ($answer > 0) {
+                return $answer;
             }
             $this->io->write('<error>Invalid port, it should be an integer</error>');
         }
@@ -414,6 +419,7 @@ class Installer
                 '{namespace}' => $this->namespace,
                 '{AppName}' => $this->appName,
                 '{ServerName}' => $this->serverName,
+                '{AdapterName}' => self::TARS_TCP_SERVER ? 'HelloObj' : 'obj',
                 '{protocol}' => self::TARS_TCP_SERVER === $this->sererType ? 'tars' : 'not_tars',
                 '{port}' => $this->port,
                 '{ServerType}' => in_array($this->sererType, [
@@ -476,7 +482,7 @@ class Installer
         chmod('resources/serve.sh', 0755);
     }
 
-    private function setPackageStabilityFalg(string $packageName, string $packageVersion): void
+    private function setPackageStabilityFlag(string $packageName, string $packageVersion): void
     {
         // Set package stability if needed
         switch (VersionParser::parseStability($packageVersion)) {
@@ -493,5 +499,10 @@ class Installer
                 $this->stabilityFlags[$packageName] = BasePackage::STABILITY_RC;
                 break;
         }
+    }
+
+    private function getDefaultNamespace(): string
+    {
+        return str_replace('/', '\\', preg_replace('#[^/\w]#', '', $this->packageName));
     }
 }

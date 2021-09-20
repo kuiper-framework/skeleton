@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 namespace {namespace}\service;
 
 use kuiper\jsonrpc\annotation\JsonRpcService;
