@@ -13,8 +13,12 @@ if [ -d $dir/../conf ] && [ -f $dir/../conf/*.conf ] ; then
     config=$(find $dir/../conf -type f -name '*.conf' | head -1)
 elif [ -f $dir/config.conf ]; then
     config=$dir/config.conf
-else
+elif [ -f $dir/config.conf.example ]; then
     config=$dir/config.conf.example
 fi
 
-php $dir/src/index.php --config $config $cmd "$@"
+if [ "$config" != "" ]; then
+    php $dir/src/index.php --config $config $cmd "$@"
+else
+    php $dir/src/index.php $cmd "$@"
+fi

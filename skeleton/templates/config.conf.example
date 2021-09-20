@@ -9,10 +9,10 @@
             app={AppName}
             server={ServerName}
             localip=127.0.0.1
-            local=tcp -h 127.0.0.1 -p 8000 -t 3000
+            local=tcp -h 127.0.0.1 -p {port} -t 3000
             basepath=.
-            datapath=./runtime/
-            logpath=./runtime/
+            datapath=./logs/
+            logpath=./logs/
             loglevel=DEBUG
             logsize=15M
             log=tars.tarslog.LogObj
@@ -27,17 +27,17 @@
             task_worker_num=1
             dispatch_mode=2
             daemonize=0
-            <{AppName}.{ServerName}.objAdapter>
+            <{AppName}.{ServerName}.{AdapterName}Adapter>
                 allow
-                endpoint=tcp -h 0.0.0.0 -p 8000 -t 60000
-                handlegroup={AppName}.{ServerName}.objAdapter
+                endpoint=tcp -h 0.0.0.0 -p {port} -t 60000
+                handlegroup={AppName}.{ServerName}.{AdapterName}Adapter
                 maxconns=200000
                 protocol={protocol}
                 queuecap=10000
                 queuetimeout=60000
-                servant={AppName}.{ServerName}.obj
+                servant={AppName}.{ServerName}.{AdapterName}
                 threads=1
-            </{AppName}.{ServerName}.objAdapter>
+            </{AppName}.{ServerName}.{AdapterName}Adapter>
         </server>
         <client>
             asyncthread=3
