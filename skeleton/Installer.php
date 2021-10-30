@@ -145,6 +145,7 @@ class Installer
         'src/servant/HelloServant.php',
         'src/service/HelloService.php',
         'src/service/HelloServiceImpl.php',
+        'helm-values.yaml',
     ];
 
     public function __construct(IOInterface $io, Composer $composer, ?string $projectRoot = null)
@@ -441,8 +442,10 @@ class Installer
         if ($this->isTarsServer()) {
             if (self::TARS_HTTP_SERVER === $this->serverType) {
                 $this->fileSystem->copy(__DIR__.'/templates/config.tars-http.php', 'src/config.php');
+                $this->fileSystem->copy(__DIR__.'/templates/helm-values.tars-http.yaml', 'helm-values.yaml');
             } else {
                 $this->fileSystem->copy(__DIR__.'/templates/config.tars.php', 'src/config.php');
+                $this->fileSystem->copy(__DIR__.'/templates/helm-values.tars.yaml', 'helm-values.yaml');
                 $this->fileSystem->copy(__DIR__.'/templates/tars/servant/hello.tars', 'tars/servant/hello.tars');
                 $this->fileSystem->copy(__DIR__.'/templates/src/application/HelloServantImpl.php',
                     'src/application/HelloServantImpl.php');
@@ -455,6 +458,7 @@ class Installer
             ];
             $this->composerDefinition['extra']['kuiper']['configuration'][] = 'kuiper\\tars\\config\\TarsServerConfiguration';
             $this->fileSystem->copy(__DIR__.'/templates/index.tars.php', 'src/index.php');
+            $this->fileSystem->copy(__DIR__.'/templates/Dockerfile', 'Dockerfile');
             $this->fileSystem->copy(__DIR__.'/templates/config.conf.example', 'config.conf.example');
             $this->fileSystem->copy(__DIR__.'/templates/config.conf.example', 'config.conf');
             $this->composerDefinition['scripts']['serve'] = '@php src/index.php --config config.conf';

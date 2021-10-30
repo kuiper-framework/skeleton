@@ -1,0 +1,43 @@
+---
+# 应用名称
+app: {AppName}
+# 服务名称
+server: {ServerName}
+# subtype(tars/normal)
+subtype: tars
+# 使用的模板(tars.nodejs/tars.cpp/tars.java/tars.go/tars.php)
+template: tars.php
+# 私有模板(通常为空)
+profile: ""
+# servant列表
+servants:
+  - name: {AdapterName}
+    # 容器内端口
+    port: {port}
+    # 是否是tars服务, 如果是http服务, 这里为false
+    isTars: true
+    #是否是tcp服务
+    isTcp: true
+    #业务线程个数
+    thread: 1
+    capacity: 100000
+    connection: 100000
+    timeout: 60000
+# 服务部署个数
+replicas: 1
+# 环境变量, 默认为空
+envVars: []
+# 是否启用宿主机网络
+hostNetwork: false
+# 是否启用hostIpc, 一旦启用, 则共享内存等, 都和宿主机打通, 这个时候就需要注意共享内存key不用搞冲突了!!!
+hostIPC: false
+# 是否启用hostPorts 默认[]即可
+hostPorts: []
+# 是否开启hostPorts, 如果使用, 则表示这个Obj, 会开启nodePort(即宿主机的port)
+#hostPorts:
+#  - nameRef: HelloObj
+#    port: 22394
+# 发布地址
+repo:
+  image: {AppName}/{ServerName}
+  secret: tars-image-secret
