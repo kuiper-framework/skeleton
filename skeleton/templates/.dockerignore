@@ -1,0 +1,8 @@
+*.tgz
+config.conf
+logs/
+runtime/
+env
+.env*
+.idea/
+.git/

@@ -1,8 +1,10 @@
 /env
 .env
-/runtime
-/vendor
+/runtime/
+/logs/
+/vendor/
 *.gz
+*.tgz
 /config.conf
 /.php_cs.cache
 /.idea/

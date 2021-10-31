@@ -11,7 +11,6 @@ use Slim\Middleware\ErrorMiddleware;
 
 return [
     'application' => [
-        'base_path' => APP_PATH,
         'server' => [
             'ports' => [
                 {port} => '{ServerType}'

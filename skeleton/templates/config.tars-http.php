@@ -11,7 +11,6 @@ use Slim\Middleware\ErrorMiddleware;
 
 return [
     'application' => [
-        'base_path' => APP_PATH,
         'web' => [
             'view' => [
                 'path' => '{application.base_path}/resources/views',

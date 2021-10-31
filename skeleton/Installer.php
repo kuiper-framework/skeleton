@@ -459,6 +459,7 @@ class Installer
             $this->composerDefinition['extra']['kuiper']['configuration'][] = 'kuiper\\tars\\config\\TarsServerConfiguration';
             $this->fileSystem->copy(__DIR__.'/templates/index.tars.php', 'src/index.php');
             $this->fileSystem->copy(__DIR__.'/templates/Dockerfile', 'Dockerfile');
+            $this->fileSystem->copy(__DIR__.'/templates/.dockerignore', '.dockerignore');
             $this->fileSystem->copy(__DIR__.'/templates/config.conf.example', 'config.conf.example');
             $this->fileSystem->copy(__DIR__.'/templates/config.conf.example', 'config.conf');
             $this->composerDefinition['scripts']['serve'] = '@php src/index.php --config config.conf';
