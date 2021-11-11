@@ -7,5 +7,6 @@
 *.tgz
 /config.conf
 /.php_cs.cache
+/.php-cs-fixer.cache
 /.idea/
 /.tars-gen.cache

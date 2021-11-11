@@ -12,13 +12,13 @@
     "require-dev": {
         "composer/composer": "^1.10",
         "phpstan/extension-installer": "^1.0",
-        "phpstan/phpstan": "^0.12",
-        "phpstan/phpstan-strict-rules": "^0.12",
+        "phpstan/phpstan": "^1.0",
+        "phpstan/phpstan-strict-rules": "^1.0",
         "mockery/mockery": "^1.3",
         "phpunit/phpunit": "^7.0",
         "kuiper/component-installer": "^0.1",
-        "roave/security-advisories": "dev-master",
-        "winwin/composer-phpcs-plugin": "^0.2"
+        "roave/security-advisories": "dev-latest",
+        "winwin/composer-phpcs-plugin": "^0.4"
     },
     "autoload": {
         "psr-4": {
@@ -30,8 +30,8 @@
     "scripts": {
         "pre-install-cmd": "kuiper\\skeleton\\Installer::install",
         "pre-update-cmd": "kuiper\\skeleton\\Installer::install",
-        "test": "./vendor/bin/phpunit tests",
-        "lint": "./vendor/bin/phpstan analyze --error-format=raw",
+        "test": ".@php -dmemory_limit=-1 /vendor/bin/phpunit tests",
+        "lint": "@php -dmemory_limit=-1 ./vendor/bin/phpstan analyze --error-format=raw",
         "container-config": "kuiper\\component\\ComponentInstaller::generate",
         "serve": "@php src/index.php --config config.conf"
     },
