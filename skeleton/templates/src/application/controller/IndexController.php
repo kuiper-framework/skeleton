@@ -2,18 +2,14 @@
 
 namespace {namespace}\application\controller;
 
-use kuiper\di\annotation\Controller;
+use kuiper\di\attribute\Controller;
 use kuiper\web\AbstractController;
-use kuiper\web\annotation\GetMapping;
+use kuiper\web\attribute\GetMapping;
 
-/**
- * @Controller
- */
+#[Controller]
 class IndexController extends AbstractController
 {
-    /**
-     * @GetMapping("/")
-     */
+    #[GetMapping("/")]
     public function index(): void
     {
         $this->getResponse()->getBody()->write("<h1>It works!</h1>\n");

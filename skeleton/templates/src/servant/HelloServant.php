@@ -11,22 +11,13 @@ declare(strict_types=1);
 
 namespace {namespace}\servant;
 
-use kuiper\tars\annotation\TarsParameter;
-use kuiper\tars\annotation\TarsReturnType;
-use kuiper\tars\annotation\TarsServant;
+use kuiper\tars\attribute\TarsParameter;
+use kuiper\tars\attribute\TarsReturnType;
+use kuiper\tars\attribute\TarsServant;
 
-/**
- * @TarsServant("HelloObj")
- */
+#[TarsServant("HelloObj")]
 interface HelloServant
 {
-    /**
-     * @TarsParameter(name="message", type="string")
-     * @TarsReturnType("string")
-     *
-     * @param string $message
-     *
-     * @return string
-     */
-    public function hello(string $message): string;
+    #[TarsReturnType("string")]
+    public function hello(#[TarsParameter(type: "string")] string $message): string;
 }

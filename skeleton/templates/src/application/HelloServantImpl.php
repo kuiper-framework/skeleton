@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace {namespace}\application;
 
-use kuiper\di\annotation\Service;
+use kuiper\di\attribute\Service;
 use {namespace}\servant\HelloServant;
 
-/**
- * @Service
- */
+#[Service]
 class HelloServantImpl implements HelloServant
 {
     /**

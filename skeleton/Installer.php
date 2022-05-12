@@ -99,33 +99,33 @@ class Installer
 
     private static $REQUIRES = [
         self::HTTP_SERVER => [
-            'kuiper/cache' => '^0.6',
-            'kuiper/web' => '^0.6',
+            'kuiper/cache' => '^0.8',
+            'kuiper/web' => '^0.8',
             'twig/twig' => '^3.0',
         ],
         self::JSONRPC_OVER_HTTP => [
-            'kuiper/jsonrpc' => '^0.6',
+            'kuiper/jsonrpc' => '^0.8',
         ],
         self::JSONRPC_OVER_TCP => [
-            'kuiper/jsonrpc' => '^0.6',
+            'kuiper/jsonrpc' => '^0.8',
         ],
         self::TARS_HTTP_SERVER => [
-            'kuiper/tars' => '^0.6',
-            'kuiper/cache' => '^0.6',
-            'kuiper/web' => '^0.6',
+            'kuiper/tars' => '^0.8',
+            'kuiper/cache' => '^0.8',
+            'kuiper/web' => '^0.8',
             'twig/twig' => '^3.0',
         ],
         self::TARS_TCP_SERVER => [
-            'kuiper/tars' => '^0.6',
+            'kuiper/tars' => '^0.8',
         ],
     ];
 
     private static $REQUIRES_DEV = [
         self::TARS_TCP_SERVER => [
-            'wenbinye/tars-gen' => '^0.4',
+            'wenbinye/tars-gen' => '^0.6',
         ],
         self::TARS_HTTP_SERVER => [
-            'wenbinye/tars-gen' => '^0.4',
+            'wenbinye/tars-gen' => '^0.6',
         ],
     ];
 
