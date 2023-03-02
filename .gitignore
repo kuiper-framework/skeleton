@@ -10,3 +10,4 @@
 /.php-cs-fixer.cache
 /.idea/
 /.tars-gen.cache
+/composer.lock
