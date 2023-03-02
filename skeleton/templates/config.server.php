@@ -8,7 +8,7 @@ return [
     'application' => [
         'server' => [
             'ports' => [
-                {port} => '{ServerType}'
+                env({port}) => '{ServerType}'
             ],
         ],
     ],

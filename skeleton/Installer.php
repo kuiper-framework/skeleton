@@ -97,7 +97,7 @@ class Installer
      */
     private $port;
 
-    private static $REQUIRES = [
+    private static array $REQUIRES = [
         self::HTTP_SERVER => [
             'kuiper/cache' => '^0.8',
             'kuiper/web' => '^0.8',
@@ -120,7 +120,7 @@ class Installer
         ],
     ];
 
-    private static $REQUIRES_DEV = [
+    private static array $REQUIRES_DEV = [
         self::TARS_TCP_SERVER => [
             'wenbinye/tars-gen' => '^0.6',
         ],
@@ -129,11 +129,11 @@ class Installer
         ],
     ];
 
-    private static $INSTALLER_DEPS = [
+    private static array $INSTALLER_DEPS = [
         'composer/composer',
     ];
 
-    private static $PLACEHOLDER_FILES = [
+    private static array $PLACEHOLDER_FILES = [
         'env.example',
         '.env',
         'src/config.php',

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace {namespace}\service;
 
-use kuiper\jsonrpc\attribute\JsonRpcService;
+use kuiper\di\attribute\Service;
 
-#[JsonRpcService]
+#[Service]
 class HelloServiceImpl implements HelloService
 {
     /**

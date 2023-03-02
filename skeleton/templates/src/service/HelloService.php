@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace {namespace}\service;
 
+use kuiper\jsonrpc\attribute\JsonRpcService;
+
+#[JsonRpcService]
 interface HelloService
 {
     /**
