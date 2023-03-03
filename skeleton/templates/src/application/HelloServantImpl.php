@@ -13,7 +13,7 @@ class HelloServantImpl implements HelloServant
     /**
      * {@inheritdoc}
      */
-    public function hello(string $message): string
+    public function say(string $message): string
     {
         return "hello $message";
     }

@@ -432,8 +432,7 @@ class Installer
                 $to = dirname($from) . '/' . ($parts[0] . '.' . $parts[2]);
             }
         }
-        error_log("COPY $from to $to");
-        $this->fileSystem->copy(__DIR__.'/templates/' . $from, $to);
+        $this->fileSystem->copy(__DIR__.'/templates/' . $from, $to, true);
     }
 
     private function setupServer(): void

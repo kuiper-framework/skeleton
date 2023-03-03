@@ -1,0 +1,13 @@
+# curl -d '{}' http://localhost:8000
+POST http://localhost:8000
+Content-Type: application/json
+
+{
+    "method": "HelloObj.say",
+    "params": ["kuiper"],
+    "jsonrpc": "2.0",
+    "id": 1
+}
+
+###
+
