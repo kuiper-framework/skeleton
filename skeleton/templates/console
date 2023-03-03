@@ -1,0 +1,12 @@
+#!/bin/bash
+
+dir=$(dirname $0)
+
+if [ $# -eq 0 ]; then
+    cmd=list
+else
+    cmd=$1
+    shift
+fi
+
+php $dir/src/index.php $cmd "$@"

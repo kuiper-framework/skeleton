@@ -8,7 +8,10 @@ return [
     'application' => [
         'server' => [
             'ports' => [
-                env({port}) => '{ServerType}'
+                env('SERVER_PORT', '{port}') => [
+                    'protocol' => '{ServerType}',
+                    'listener' => '{JsonRpcListener}'
+                ]
             ],
         ],
     ],

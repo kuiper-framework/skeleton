@@ -133,21 +133,6 @@ class Installer
         'composer/composer',
     ];
 
-    private static array $PLACEHOLDER_FILES = [
-        'env.example',
-        '.env',
-        'src/config.php',
-        'config.conf.example',
-        'config.conf',
-        'tars/servant/hello.tars',
-        'src/application/controller/IndexController.php',
-        'src/application/HelloServantImpl.php',
-        'src/servant/HelloServant.php',
-        'src/service/HelloService.php',
-        'src/service/HelloServiceImpl.php',
-        'helm-values.yaml',
-    ];
-
     public function __construct(IOInterface $io, Composer $composer, ?string $projectRoot = null)
     {
         $this->io = $io;
@@ -194,8 +179,8 @@ class Installer
         }
         $installer->port = $installer->askPort();
 
-        $installer->setupServer();
         $installer->replacePlaceHolder();
+        $installer->setupServer();
         $installer->fixComposerDefinition();
         $installer->addPackages();
         $installer->updateRootPackage();
@@ -414,78 +399,117 @@ class Installer
 
     private function replacePlaceHolder(): void
     {
-        foreach (self::$PLACEHOLDER_FILES as $file) {
-            if (!file_exists($file)) {
+        $dir_it = new \RecursiveDirectoryIterator($this->projectRoot."/skeleton/templates");
+        foreach (new \RecursiveIteratorIterator($dir_it) as $file => $fileinfo) {
+            if (!is_file($file)) {
                 continue;
             }
             $content = file_get_contents($file);
+            $serverType = in_array($this->serverType, [
+                self::HTTP_SERVER, self::JSONRPC_OVER_HTTP, self::TARS_HTTP_SERVER,
+            ], true) ? 'http' : 'tcp';
             $replace = strtr($content, [
+                '{PackageName}' => $this->packageName,
                 '{namespace}' => $this->namespace,
                 '{AppName}' => $this->appName,
-                '{ServerName}' => $this->serverName,
+                '{ServerName}' => $this->serverName ?? 'app',
                 '{AdapterName}' => self::TARS_TCP_SERVER === $this->serverType ? 'HelloObj' : 'obj',
                 '{protocol}' => self::TARS_TCP_SERVER === $this->serverType ? 'tars' : 'not_tars',
                 '{port}' => $this->port,
-                '{ServerType}' => in_array($this->serverType, [
-                    self::HTTP_SERVER, self::JSONRPC_OVER_HTTP, self::TARS_HTTP_SERVER,
-                ], true) ? 'http' : 'tcp',
+                '{ServerType}' => $serverType,
+                '{JsonRpcListener}' => $serverType === 'http' ? 'jsonRpcHttpRequestListener' : 'jsonRpcTcpReceiveEventListener'
             ]);
             file_put_contents($file, $replace);
         }
     }
 
+    private function copyFile(string $from, string $to = null): void
+    {
+        if (!isset($to)) {
+            $to = $from;
+            $parts = explode('.', basename($from));
+            if (count($parts) === 3 && in_array($parts[1], ['http', 'jsonrpc', 'tars', 'tars-http'], true)) {
+                $to = dirname($from) . '/' . ($parts[0] . '.' . $parts[2]);
+            }
+        }
+        error_log("COPY $from to $to");
+        $this->fileSystem->copy(__DIR__.'/templates/' . $from, $to);
+    }
+
     private function setupServer(): void
     {
-        $this->fileSystem->copy(__DIR__.'/templates/env.example', 'env.example');
-        $this->fileSystem->copy(__DIR__.'/templates/env.example', '.env');
         $this->composerDefinition['scripts']['serve'] = '@php src/index.php';
+        $this->copyFile("README.md");
+        $this->copyFile("Dockerfile");
+        $this->copyFile('.dockerignore');
+        $this->copyFile('console');
+        $this->copyFile('env.example');
+        $this->copyFile('helm-values.yaml');
+        $this->copyFile('src/index.php');
+        $this->copyFile('src/config.php');
         if ($this->isTarsServer()) {
-            if (self::TARS_HTTP_SERVER === $this->serverType) {
-                $this->fileSystem->copy(__DIR__.'/templates/config.tars-http.php', 'src/config.php');
-                $this->fileSystem->copy(__DIR__.'/templates/helm-values.tars-http.yaml', 'helm-values.yaml');
-            } else {
-                $this->fileSystem->copy(__DIR__.'/templates/config.tars.php', 'src/config.php');
-                $this->fileSystem->copy(__DIR__.'/templates/helm-values.tars.yaml', 'helm-values.yaml');
-                $this->fileSystem->copy(__DIR__.'/templates/tars/servant/hello.tars', 'tars/servant/hello.tars');
-                $this->fileSystem->copy(__DIR__.'/templates/src/application/HelloServantImpl.php',
-                    'src/application/HelloServantImpl.php');
-                $this->fileSystem->copy(__DIR__.'/templates/src/servant/HelloServant.php',
-                    'src/servant/HelloServant.php');
-            }
-            $this->composerDefinition['extra']['tars'] = [
-                'manifest' => ['console'],
-                'server_name' => $this->serverName,
-            ];
-            $this->composerDefinition['extra']['kuiper']['configuration'][] = 'kuiper\\tars\\config\\TarsServerConfiguration';
-            $this->fileSystem->copy(__DIR__.'/templates/index.tars.php', 'src/index.php');
-            $this->fileSystem->copy(__DIR__.'/templates/Dockerfile', 'Dockerfile');
-            $this->fileSystem->copy(__DIR__.'/templates/.dockerignore', '.dockerignore');
-            $this->fileSystem->copy(__DIR__.'/templates/config.conf.example', 'config.conf.example');
-            $this->fileSystem->copy(__DIR__.'/templates/config.conf.example', 'config.conf');
-            $this->composerDefinition['scripts']['serve'] = '@php src/index.php --config config.conf';
-            $this->composerDefinition['scripts']['package'] = 'kuiper\\tars\\server\\PackageBuilder::run';
-            $this->composerDefinition['scripts']['gen'] = './vendor/bin/tars-gen && ./vendor/bin/php-cs-fixer fix src';
+            $this->setupTarsServer();
         }
-        $this->fileSystem->copy(__DIR__.'/templates/index.php', 'src/index.php');
         if ($this->isHttpServer()) {
-            if (self::HTTP_SERVER === $this->serverType) {
-                $this->fileSystem->copy(__DIR__.'/templates/config.http.php', 'src/config.php');
-            }
-            $this->fileSystem->mkdir('resources/views');
-            $this->fileSystem->touch('resources/views/.gitkeep');
-            $this->fileSystem->copy(__DIR__.'/templates/src/application/controller/IndexController.php',
-                'src/application/controller/IndexController.php');
-            $this->composerDefinition['extra']['kuiper']['configuration'][] = 'kuiper\\web\\WebConfiguration';
+            $this->setupHttpServer();
         }
         if ($this->isJsonRpcServer()) {
-            $this->fileSystem->copy(__DIR__.'/templates/config.server.php', 'src/config.php');
-            $this->composerDefinition['extra']['kuiper']['configuration'][] = 'kuiper\\jsonrpc\\config\\JsonRpcServerConfiguration';
-            $this->fileSystem->copy(__DIR__.'/templates/src/service/HelloService.php',
-                'src/service/HelloService.php');
-            $this->fileSystem->copy(__DIR__.'/templates/src/service/HelloServiceImpl.php',
-                'src/service/HelloServiceImpl.php');
+            $this->setupJsonRpcServer();
         }
         chmod('resources/serve.sh', 0755);
+        chmod('console', 0755);
+        $this->fileSystem->copy('env.example', '.env.local');
+    }
+
+    /**
+     * @return void
+     */
+    private function setupTarsServer(): void
+    {
+        if (self::TARS_HTTP_SERVER === $this->serverType) {
+            $this->copyFile('helm-values.tars-http.yaml');
+        } else {
+            $this->copyFile('helm-values.tars.yaml');
+            $this->copyFile( 'tars/servant/hello.tars');
+            $this->copyFile('src/application/HelloServantImpl.php');
+            $this->copyFile('src/servant/HelloServant.php');
+        }
+        $this->copyFile('src/index.tars.php');
+        $this->copyFile('config.conf.example');
+        $this->copyFile('console.tars', 'console');
+        $this->fileSystem->copy('config.conf.example', 'config.conf');
+
+        $this->composerDefinition['extra']['tars'] = [
+            'manifest' => ['console'],
+            'server_name' => $this->serverName,
+        ];
+        $this->composerDefinition['extra']['kuiper']['configuration'][] = 'kuiper\\tars\\config\\TarsServerConfiguration';
+        $this->composerDefinition['scripts']['serve'] = '@php src/index.php --config config.conf';
+        $this->composerDefinition['scripts']['package'] = 'kuiper\\tars\\server\\PackageBuilder::run';
+        $this->composerDefinition['scripts']['gen'] = './vendor/bin/tars-gen && ./vendor/bin/php-cs-fixer fix src';
+    }
+
+    private function setupHttpServer(): void
+    {
+        if (self::HTTP_SERVER === $this->serverType) {
+            $this->copyFile('src/config.http.php');
+            $this->copyFile('env.http.example');
+        }
+        $this->copyFile('resources/views/index.html');
+        $this->copyFile('src/application/controller/IndexController.php');
+        $this->composerDefinition['extra']['kuiper']['configuration'][] = 'kuiper\\web\\WebConfiguration';
+    }
+
+    private function setupJsonRpcServer(): void
+    {
+        $this->copyFile("env.jsonrpc.example");
+        $this->copyFile("tars/servant/hello.tars");
+        $this->copyFile("tars/config.json");
+        $this->copyFile('src/config.jsonrpc.php');
+        $this->copyFile('src/servant/HelloServant.jsonrpc.php');
+        $this->copyFile('src/application/HelloServantImpl.php');
+        $this->composerDefinition['extra']['kuiper']['configuration'][] = 'kuiper\\jsonrpc\\config\\JsonRpcServerConfiguration';
+        $this->composerDefinition['scripts']['gen'] = './vendor/bin/tars-gen && ./vendor/bin/php-cs-fixer fix src';
     }
 
     private function setPackageStabilityFlag(string $packageName, string $packageVersion): void
@@ -511,4 +535,5 @@ class Installer
     {
         return str_replace('/', '\\', preg_replace('#[^/\w]#', '', $this->packageName));
     }
+
 }

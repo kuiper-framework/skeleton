@@ -2,6 +2,6 @@ module {ServerName}
 {
     interface Hello
     {
-        string hello(string message);
+        string say(string message);
     };
 };
