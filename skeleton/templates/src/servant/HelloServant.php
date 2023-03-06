@@ -19,5 +19,5 @@ use kuiper\tars\attribute\TarsServant;
 interface HelloServant
 {
     #[TarsReturnType("string")]
-    public function hello(#[TarsParameter(type: "string")] string $message): string;
+    public function say(#[TarsParameter(type: "string")] string $message): string;
 }

@@ -491,7 +491,6 @@ class Installer
     private function setupHttpServer(): void
     {
         if (self::HTTP_SERVER === $this->serverType) {
-            $this->copyFile('src/config.http.php');
             $this->copyFile('env.http.example');
         }
         $this->copyFile('resources/views/index.html');
